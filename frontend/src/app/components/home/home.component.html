@@ -1,0 +1,136 @@
+<!-- 欢迎横幅 -->
+<div class="card" style="background: linear-gradient(135deg, #1976d2, #42a5f5); color: white; text-align: center; padding: 48px 24px; margin-bottom: 32px;">
+  <mat-icon style="font-size: 64px; width: 64px; height: 64px; margin-bottom: 16px;">train</mat-icon>
+  <h1 style="margin-bottom: 16px; font-size: 2rem;">地铁失物招领系统</h1>
+  <p style="font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto 24px;">
+    让每一件失物都能找到主人，让每一次旅途都安心无忧
+  </p>
+  <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+    <button mat-raised-button routerLink="/lost" style="background: white; color: #1976d2; font-weight: 500;">
+      <mat-icon>search</mat-icon>
+      浏览失物招领
+    </button>
+    <button mat-raised-button routerLink="/publish" style="background: transparent; color: white; border: 2px solid white; font-weight: 500;">
+      <mat-icon>add</mat-icon>
+      发布信息
+    </button>
+  </div>
+</div>
+
+<!-- 统计信息 -->
+<div class="stats-grid">
+  <mat-card class="stat-card">
+    <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #1976d2;">search</mat-icon>
+    <div class="number">{{ recentItems.length }}</div>
+    <div class="label">最新发布</div>
+  </mat-card>
+  <mat-card class="stat-card">
+    <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #4caf50;">check_circle</mat-icon>
+    <div class="number">95%</div>
+    <div class="label">审核通过率</div>
+  </mat-card>
+  <mat-card class="stat-card">
+    <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ff9800;">directions_subway</mat-icon>
+    <div class="number">5</div>
+    <div class="label">覆盖线路</div>
+  </mat-card>
+  <mat-card class="stat-card">
+    <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #e91e63;">people</mat-icon>
+    <div class="number">1000+</div>
+    <div class="label">注册用户</div>
+  </mat-card>
+</div>
+
+<!-- 最新发布 -->
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title class="card-header">
+      <mat-icon style="vertical-align: middle; margin-right: 8px;">new_releases</mat-icon>
+      最新发布
+      <button mat-button style="margin-left: auto;" routerLink="/lost">
+        查看全部 <mat-icon>chevron_right</mat-icon>
+      </button>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngIf="loading" class="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    
+    <div *ngIf="!loading && recentItems.length === 0" class="empty-state">
+      <mat-icon class="icon">inbox</mat-icon>
+      <h3>暂无信息</h3>
+      <p>还没有用户发布失物招领信息</p>
+    </div>
+    
+    <div *ngIf="!loading && recentItems.length > 0" class="row">
+      <div class="col-md-4" *ngFor="let item of recentItems">
+        <mat-card class="card" style="height: 100%; cursor: pointer;" [routerLink]="['/item', item.id]">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+              {{ getItemTypeText(item.itemType) }}
+            </span>
+            <small style="color: #757575;">
+              <mat-icon style="font-size: 16px; vertical-align: middle;">visibility</mat-icon>
+              {{ item.viewCount }}
+            </small>
+          </div>
+          <h3 style="margin-bottom: 8px; font-size: 1rem; font-weight: 500; color: #333;">
+            {{ item.title }}
+          </h3>
+          <p style="color: #757575; font-size: 14px; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            {{ item.description }}
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #999;">
+            <span>
+              <mat-icon style="font-size: 14px; vertical-align: middle;">person</mat-icon>
+              {{ item.publisherName }}
+            </span>
+            <span>{{ item.createdAt | date: 'yyyy-MM-dd' }}</span>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<!-- 使用说明 -->
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title class="card-header">
+      <mat-icon style="vertical-align: middle; margin-right: 8px;">help_outline</mat-icon>
+      如何使用
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="row">
+      <div class="col-md-4">
+        <div style="text-align: center; padding: 16px;">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #1976d2; margin-bottom: 16px;">search</mat-icon>
+          <h3 style="margin-bottom: 8px;">浏览信息</h3>
+          <p style="color: #757575; font-size: 14px;">
+            查看已审核通过的失物招领信息，寻找您丢失的物品或帮助他人找回失物
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div style="text-align: center; padding: 16px;">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #4caf50; margin-bottom: 16px;">add_circle</mat-icon>
+          <h3 style="margin-bottom: 8px;">发布信息</h3>
+          <p style="color: #757575; font-size: 14px;">
+            注册登录后，可以发布寻物启事或招领启事，描述物品详情和联系方式
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div style="text-align: center; padding: 16px;">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ff9800; margin-bottom: 16px;">thumb_up</mat-icon>
+          <h3 style="margin-bottom: 8px;">在线认领</h3>
+          <p style="color: #757575; font-size: 14px;">
+            找到您的物品后，可以在线提交认领申请，等待管理员审核确认
+          </p>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,162 @@
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title class="card-header">
+      <mat-icon style="vertical-align: middle; margin-right: 8px;">manage_search</mat-icon>
+      信息管理
+      <span style="font-size: 14px; font-weight: normal; color: #757575; margin-left: 16px;">
+        共 {{ totalElements }} 条记录
+      </span>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <!-- 筛选条件 -->
+    <form [formGroup]="filterForm" (ngSubmit)="onSearch()" class="filter-bar">
+      <div class="form-group">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>状态</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let option of getStatusOptions()" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      
+      <div class="form-group">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>类型</mat-label>
+          <mat-select formControlName="itemType">
+            <mat-option *ngFor="let option of getItemTypeOptions()" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      
+      <div class="form-group">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>关键词</mat-label>
+          <input matInput formControlName="keyword" placeholder="标题或描述">
+        </mat-form-field>
+      </div>
+      
+      <div class="form-group" style="display: flex; gap: 8px; align-items: flex-end;">
+        <button mat-raised-button color="primary" type="submit">
+          <mat-icon>search</mat-icon>
+          搜索
+        </button>
+        <button mat-button type="button" (click)="onReset()">
+          重置
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="loading" class="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    
+    <div *ngIf="!loading && items.length === 0" class="empty-state">
+      <mat-icon class="icon">inbox</mat-icon>
+      <h3>暂无数据</h3>
+      <p>没有符合条件的记录</p>
+    </div>
+    
+    <div *ngIf="!loading && items.length > 0">
+      <div class="table-container">
+        <table mat-table [dataSource]="items" class="mat-elevation-z8" style="width: 100%;">
+          <!-- 类型列 -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>类型</th>
+            <td mat-cell *matCellDef="let item">
+              <span class="status-badge" [ngClass]="item.itemType === 'LOST' ? 'status-pending' : 'status-approved'">
+                {{ getItemTypeText(item.itemType) }}
+              </span>
+            </td>
+          </ng-container>
+          
+          <!-- 标题列 -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>标题</th>
+            <td mat-cell *matCellDef="let item">
+              <a [routerLink]="['/item', item.id]" style="color: #1976d2; text-decoration: none; font-weight: 500;">
+                {{ item.title }}
+              </a>
+            </td>
+          </ng-container>
+          
+          <!-- 发布者列 -->
+          <ng-container matColumnDef="publisher">
+            <th mat-header-cell *matHeaderCellDef>发布者</th>
+            <td mat-cell *matCellDef="let item">
+              {{ item.publisherName || '-' }}
+            </td>
+          </ng-container>
+          
+          <!-- 状态列 -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>状态</th>
+            <td mat-cell *matCellDef="let item">
+              <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                {{ getStatusText(item.status) }}
+              </span>
+            </td>
+          </ng-container>
+          
+          <!-- 发布时间列 -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>发布时间</th>
+            <td mat-cell *matCellDef="let item">
+              {{ item.createdAt | date: 'yyyy-MM-dd HH:mm' }}
+            </td>
+          </ng-container>
+          
+          <!-- 操作列 -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>操作</th>
+            <td mat-cell *matCellDef="let item">
+              <button mat-icon-button [routerLink]="['/item', item.id]" matTooltip="查看详情">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              
+              <button mat-icon-button *ngIf="item.status === 'PENDING'" (click)="approveItem(item.id)" matTooltip="通过" color="primary">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+              
+              <button mat-icon-button *ngIf="item.status === 'PENDING'" (click)="rejectItem(item.id)" matTooltip="拒绝" color="warn">
+                <mat-icon>cancel</mat-icon>
+              </button>
+              
+              <button mat-icon-button *ngIf="item.status === 'CLAIMED'" (click)="markAsReturned(item.id)" matTooltip="标记已归还" color="accent">
+                <mat-icon>thumb_up</mat-icon>
+              </button>
+              
+              <button mat-icon-button (click)="deleteItem(item.id)" matTooltip="删除" color="warn">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          
+          <tr mat-header-row *matHeaderRowDef="['type', 'title', 'publisher', 'status', 'createdAt', 'actions']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['type', 'title', 'publisher', 'status', 'createdAt', 'actions'];"></tr>
+        </table>
+      </div>
+      
+      <!-- 分页 -->
+      <div class="pagination" style="margin-top: 24px;">
+        <button mat-button (click)="goToPage(page - 1)" [disabled]="page === 0">
+          <mat-icon>chevron_left</mat-icon>
+          上一页
+        </button>
+        
+        <span style="padding: 8px 16px; font-weight: 500;">
+          第 {{ page + 1 }} 页 / 共 {{ totalPages }} 页
+        </span>
+        
+        <button mat-button (click)="goToPage(page + 1)" [disabled]="page >= totalPages - 1">
+          下一页
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

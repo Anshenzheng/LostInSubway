@@ -1,0 +1,160 @@
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title class="card-header">
+      <mat-icon style="vertical-align: middle; margin-right: 8px;">bar_chart</mat-icon>
+      统计分析
+      <div style="margin-left: auto; display: flex; gap: 8px;">
+        <button mat-raised-button (click)="exportItems()" [disabled]="exporting">
+          <mat-spinner *ngIf="exporting" diameter="20" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></mat-spinner>
+          <mat-icon>download</mat-icon>
+          导出记录
+        </button>
+        <button mat-raised-button color="primary" (click)="exportStatistics()" [disabled]="exporting">
+          <mat-icon>assessment</mat-icon>
+          导出统计
+        </button>
+      </div>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngIf="loading" class="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    
+    <div *ngIf="!loading && statistics">
+      <!-- 概览统计 -->
+      <div class="stats-grid">
+        <mat-card class="stat-card">
+          <div class="number">{{ statistics.totalItems }}</div>
+          <div class="label">总记录数</div>
+        </mat-card>
+        <mat-card class="stat-card">
+          <div class="number">{{ statistics.pendingItems }}</div>
+          <div class="label">待审核</div>
+        </mat-card>
+        <mat-card class="stat-card">
+          <div class="number">{{ statistics.approvedItems }}</div>
+          <div class="label">已通过</div>
+        </mat-card>
+        <mat-card class="stat-card">
+          <div class="number">{{ statistics.returnedItems }}</div>
+          <div class="label">已归还</div>
+        </mat-card>
+        <mat-card class="stat-card">
+          <div class="number">{{ statistics.rejectedItems }}</div>
+          <div class="label">已拒绝</div>
+        </mat-card>
+        <mat-card class="stat-card">
+          <div class="number">{{ statistics.returnRate }}%</div>
+          <div class="label">归还率</div>
+        </mat-card>
+      </div>
+
+      <div class="row">
+        <!-- 线路分布 -->
+        <div class="col-md-6" *ngIf="statistics.lineStatistics?.length">
+          <mat-card class="card" style="margin-bottom: 0;">
+            <mat-card-header>
+              <mat-card-title style="font-size: 1.1rem; color: #1976d2;">
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">directions_subway</mat-icon>
+                线路分布
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="statistics.lineStatistics" class="mat-elevation-z8" style="width: 100%;">
+                  <ng-container matColumnDef="lineName">
+                    <th mat-header-cell *matHeaderCellDef>线路名称</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.lineName }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="count">
+                    <th mat-header-cell *matHeaderCellDef>数量</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.count }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="percentage">
+                    <th mat-header-cell *matHeaderCellDef>占比</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.percentage }}%</td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="['lineName', 'count', 'percentage']"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['lineName', 'count', 'percentage'];"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- 物品类型分布 -->
+        <div class="col-md-6" *ngIf="statistics.itemTypeStatistics?.length">
+          <mat-card class="card" style="margin-bottom: 0;">
+            <mat-card-header>
+              <mat-card-title style="font-size: 1.1rem; color: #1976d2;">
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">category</mat-icon>
+                物品类型分布
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="statistics.itemTypeStatistics" class="mat-elevation-z8" style="width: 100%;">
+                  <ng-container matColumnDef="typeName">
+                    <th mat-header-cell *matHeaderCellDef>类型名称</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.typeName }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="count">
+                    <th mat-header-cell *matHeaderCellDef>数量</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.count }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="percentage">
+                    <th mat-header-cell *matHeaderCellDef>占比</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.percentage }}%</td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="['typeName', 'count', 'percentage']"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['typeName', 'count', 'percentage'];"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <!-- 月度趋势 -->
+      <div class="row" style="margin-top: 24px;">
+        <div class="col-md-12" *ngIf="statistics.monthStatistics?.length">
+          <mat-card class="card" style="margin-bottom: 0;">
+            <mat-card-header>
+              <mat-card-title style="font-size: 1.1rem; color: #1976d2;">
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">trending_up</mat-icon>
+                近6个月趋势
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="statistics.monthStatistics" class="mat-elevation-z8" style="width: 100%;">
+                  <ng-container matColumnDef="month">
+                    <th mat-header-cell *matHeaderCellDef>月份</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.month }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="total">
+                    <th mat-header-cell *matHeaderCellDef>发布数量</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.total }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="returned">
+                    <th mat-header-cell *matHeaderCellDef>归还数量</th>
+                    <td mat-cell *matCellDef="let stat">{{ stat.returned }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="rate">
+                    <th mat-header-cell *matHeaderCellDef>归还率</th>
+                    <td mat-cell *matCellDef="let stat">
+                      {{ stat.total > 0 ? (stat.returned / stat.total * 100).toFixed(1) : 0 }}%
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="['month', 'total', 'returned', 'rate']"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['month', 'total', 'returned', 'rate'];"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
