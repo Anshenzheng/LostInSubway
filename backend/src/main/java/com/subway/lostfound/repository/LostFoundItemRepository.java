@@ -25,6 +25,8 @@ public interface LostFoundItemRepository extends JpaRepository<LostFoundItem, Lo
     
     List<LostFoundItem> findByStatus(ItemStatus status);
     
+    long countByStatus(ItemStatus status);
+    
     @Query("SELECT COUNT(l) FROM LostFoundItem l WHERE l.createdAt >= :startDate AND l.createdAt < :endDate")
     long countByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
     
