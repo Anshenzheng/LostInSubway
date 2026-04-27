@@ -1,0 +1,54 @@
+<div class="row justify-content-center" style="margin-top: 50px;">
+  <div class="col-md-6 col-lg-5">
+    <mat-card class="card">
+      <mat-card-header>
+        <mat-card-title class="card-header" style="border-bottom: none; margin-bottom: 0;">
+          <mat-icon style="vertical-align: middle; margin-right: 8px;">login</mat-icon>
+          用户登录
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div *ngIf="error" class="alert alert-error">
+            {{ error }}
+          </div>
+          
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>用户名</mat-label>
+              <input matInput formControlName="username" placeholder="请输入用户名">
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-error *ngIf="f['username'].invalid && f['username'].touched">
+                <span *ngIf="f['username'].errors?.['required']">用户名不能为空</span>
+                <span *ngIf="f['username'].errors?.['minlength']">用户名至少2个字符</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>密码</mat-label>
+              <input matInput type="password" formControlName="password" placeholder="请输入密码">
+              <mat-icon matPrefix>lock</mat-icon>
+              <mat-error *ngIf="f['password'].invalid && f['password'].touched">
+                <span *ngIf="f['password'].errors?.['required']">密码不能为空</span>
+                <span *ngIf="f['password'].errors?.['minlength']">密码至少6个字符</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-group" style="text-align: center;">
+            <button mat-raised-button color="primary" type="submit" [disabled]="loading || loginForm.invalid" style="min-width: 150px; padding: 12px;">
+              <mat-spinner *ngIf="loading" diameter="20" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></mat-spinner>
+              <span *ngIf="!loading">登 录</span>
+            </button>
+          </div>
+          
+          <div style="text-align: center; margin-top: 16px;">
+            还没有账号？ <a routerLink="/register" style="color: #1976d2; text-decoration: none;">立即注册</a>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

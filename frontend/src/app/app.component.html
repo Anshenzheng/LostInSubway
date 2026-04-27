@@ -1,0 +1,48 @@
+<mat-toolbar color="primary" class="navbar">
+  <span class="navbar-brand">
+    <mat-icon>train</mat-icon>
+    地铁失物招领系统
+  </span>
+  
+  <span class="spacer"></span>
+  
+  <nav class="navbar-nav" *ngIf="!authService.isLoggedIn">
+    <a mat-button routerLink="/" routerLinkActive="active">首页</a>
+    <a mat-button routerLink="/lost" routerLinkActive="active">失物招领</a>
+    <a mat-button routerLink="/login">登录</a>
+    <a mat-button routerLink="/register">注册</a>
+  </nav>
+  
+  <nav class="navbar-nav" *ngIf="authService.isLoggedIn && !authService.isAdmin">
+    <a mat-button routerLink="/" routerLinkActive="active">首页</a>
+    <a mat-button routerLink="/lost" routerLinkActive="active">失物招领</a>
+    <a mat-button routerLink="/publish">发布信息</a>
+    <a mat-button routerLink="/my-items">我的发布</a>
+    <a mat-button routerLink="/my-claims">我的认领</a>
+    <button mat-button (click)="logout()">
+      退出 ({{ authService.currentUserValue?.username }})
+    </button>
+  </nav>
+  
+  <nav class="navbar-nav" *ngIf="authService.isAdmin">
+    <a mat-button routerLink="/" routerLinkActive="active">首页</a>
+    <a mat-button routerLink="/lost" routerLinkActive="active">失物招领</a>
+    <a mat-button routerLink="/admin">管理后台</a>
+    <a mat-button routerLink="/admin/items">信息管理</a>
+    <a mat-button routerLink="/admin/claims">认领管理</a>
+    <a mat-button routerLink="/admin/statistics">统计分析</a>
+    <button mat-button (click)="logout()">
+      退出 ({{ authService.currentUserValue?.username }})
+    </button>
+  </nav>
+</mat-toolbar>
+
+<main class="container" style="padding-top: 24px; padding-bottom: 24px;">
+  <router-outlet></router-outlet>
+</main>
+
+<footer style="background: #f5f5f5; padding: 24px 0; text-align: center; color: #757575; border-top: 1px solid #eee;">
+  <div class="container">
+    <p>© 2024 地铁失物招领系统 - 让失物找回更容易</p>
+  </div>
+</footer>

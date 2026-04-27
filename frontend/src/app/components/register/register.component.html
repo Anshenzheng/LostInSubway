@@ -1,0 +1,118 @@
+<div class="row justify-content-center" style="margin-top: 50px;">
+  <div class="col-md-8 col-lg-6">
+    <mat-card class="card">
+      <mat-card-header>
+        <mat-card-title class="card-header" style="border-bottom: none; margin-bottom: 0;">
+          <mat-icon style="vertical-align: middle; margin-right: 8px;">person_add</mat-icon>
+          用户注册
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <div *ngIf="error" class="alert alert-error">
+            {{ error }}
+          </div>
+          
+          <div *ngIf="success" class="alert alert-success">
+            {{ success }}
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>用户名 *</mat-label>
+                  <input matInput formControlName="username" placeholder="请输入用户名">
+                  <mat-error *ngIf="f['username'].invalid && f['username'].touched">
+                    <span *ngIf="f['username'].errors?.['required']">用户名不能为空</span>
+                    <span *ngIf="f['username'].errors?.['minlength']">用户名至少2个字符</span>
+                    <span *ngIf="f['username'].errors?.['maxlength']">用户名最多50个字符</span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>真实姓名</mat-label>
+                  <input matInput formControlName="realName" placeholder="请输入真实姓名">
+                  <mat-error *ngIf="f['realName'].invalid && f['realName'].touched">
+                    <span *ngIf="f['realName'].errors?.['maxlength']">姓名最多50个字符</span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>密码 *</mat-label>
+                  <input matInput type="password" formControlName="password" placeholder="请输入密码">
+                  <mat-error *ngIf="f['password'].invalid && f['password'].touched">
+                    <span *ngIf="f['password'].errors?.['required']">密码不能为空</span>
+                    <span *ngIf="f['password'].errors?.['minlength']">密码至少6个字符</span>
+                    <span *ngIf="f['password'].errors?.['maxlength']">密码最多100个字符</span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>确认密码 *</mat-label>
+                  <input matInput type="password" formControlName="confirmPassword" placeholder="请再次输入密码">
+                  <mat-error *ngIf="f['confirmPassword'].invalid && f['confirmPassword'].touched">
+                    <span *ngIf="f['confirmPassword'].errors?.['required']">请确认密码</span>
+                    <span *ngIf="f['confirmPassword'].errors?.['passwordMismatch']">两次密码不一致</span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>手机号</mat-label>
+                  <input matInput formControlName="phone" placeholder="请输入手机号">
+                  <mat-error *ngIf="f['phone'].invalid && f['phone'].touched">
+                    <span *ngIf="f['phone'].errors?.['pattern']">手机号格式不正确</span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>邮箱</mat-label>
+                  <input matInput formControlName="email" placeholder="请输入邮箱">
+                  <mat-error *ngIf="f['email'].invalid && f['email'].touched">
+                    <span *ngIf="f['email'].errors?.['email']">邮箱格式不正确</span>
+                    <span *ngIf="f['email'].errors?.['maxlength']">邮箱最多100个字符</span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group" style="text-align: center; margin-top: 24px;">
+            <button mat-raised-button color="primary" type="submit" [disabled]="loading || registerForm.invalid" style="min-width: 150px; padding: 12px;">
+              <mat-spinner *ngIf="loading" diameter="20" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></mat-spinner>
+              <span *ngIf="!loading">注 册</span>
+            </button>
+          </div>
+          
+          <div style="text-align: center; margin-top: 16px;">
+            已有账号？ <a routerLink="/login" style="color: #1976d2; text-decoration: none;">立即登录</a>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

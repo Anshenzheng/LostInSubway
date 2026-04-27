@@ -1,0 +1,177 @@
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title class="card-header">
+      <mat-icon style="vertical-align: middle; margin-right: 8px;">add_circle</mat-icon>
+      发布失物招领信息
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <div *ngIf="error" class="alert alert-error">
+        {{ error }}
+      </div>
+      
+      <div *ngIf="success" class="alert alert-success">
+        {{ success }}
+      </div>
+
+      <!-- 信息类型 -->
+      <div class="form-group">
+        <label>信息类型 *</label>
+        <mat-radio-group formControlName="itemType" style="display: flex; gap: 24px; margin-top: 8px;">
+          <mat-radio-button *ngFor="let option of getItemTypeOptions()" [value]="option.value">
+            <mat-icon style="vertical-align: middle; margin-right: 8px;">
+              {{ option.value === 'LOST' ? 'search' : 'volunteer_activism' }}
+            </mat-icon>
+            {{ option.label }}
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- 标题 -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>标题 *</mat-label>
+          <input matInput formControlName="title" placeholder="请输入标题，简要描述物品信息">
+          <mat-error *ngIf="f['title'].invalid && f['title'].touched">
+            <span *ngIf="f['title'].errors?.['required']">标题不能为空</span>
+            <span *ngIf="f['title'].errors?.['maxlength']">标题最多100个字符</span>
+          </mat-error>
+          <mat-hint align="end">{{ f['title'].value?.length || 0 }}/100</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>物品类型</mat-label>
+              <mat-select formControlName="itemTypeId">
+                <mat-option [value]="null">请选择</mat-option>
+                <mat-option *ngFor="let type of itemTypes" [value]="type.id">
+                  {{ type.typeName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>地铁线路</mat-label>
+              <mat-select formControlName="subwayLineId">
+                <mat-option [value]="null">请选择</mat-option>
+                <mat-option *ngFor="let line of subwayLines" [value]="line.id">
+                  {{ line.lineName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>站点名称</mat-label>
+              <input matInput formControlName="stationName" placeholder="请输入站点名称">
+              <mat-error *ngIf="f['stationName'].invalid && f['stationName'].touched">
+                <span *ngIf="f['stationName'].errors?.['maxlength']">最多100个字符</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>失物/招领时间</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="lostFoundTime">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- 详细描述 -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>详细描述 *</mat-label>
+          <textarea matInput formControlName="description" rows="5" placeholder="请详细描述物品特征、颜色、品牌、丢失位置等信息"></textarea>
+          <mat-error *ngIf="f['description'].invalid && f['description'].touched">
+            <span *ngIf="f['description'].errors?.['required']">描述不能为空</span>
+            <span *ngIf="f['description'].errors?.['maxlength']">最多2000个字符</span>
+          </mat-error>
+          <mat-hint align="end">{{ f['description'].value?.length || 0 }}/2000</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- 联系方式 -->
+      <mat-divider style="margin: 24px 0;"></mat-divider>
+      <h4 style="margin-bottom: 16px; color: #1976d2;">联系方式</h4>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>联系人</mat-label>
+              <input matInput formControlName="contactName" placeholder="请输入联系人姓名">
+              <mat-error *ngIf="f['contactName'].invalid && f['contactName'].touched">
+                <span *ngIf="f['contactName'].errors?.['maxlength']">最多50个字符</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>联系电话</mat-label>
+              <input matInput formControlName="contactPhone" placeholder="请输入联系电话">
+              <mat-error *ngIf="f['contactPhone'].invalid && f['contactPhone'].touched">
+                <span *ngIf="f['contactPhone'].errors?.['maxlength']">最多20个字符</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>联系邮箱</mat-label>
+              <input matInput formControlName="contactEmail" placeholder="请输入联系邮箱">
+              <mat-error *ngIf="f['contactEmail'].invalid && f['contactEmail'].touched">
+                <span *ngIf="f['contactEmail'].errors?.['email']">邮箱格式不正确</span>
+                <span *ngIf="f['contactEmail'].errors?.['maxlength']">最多100个字符</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- 图片链接 -->
+      <div class="form-group">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>图片URL（可选）</mat-label>
+          <input matInput formControlName="imageUrls" placeholder="如有图片，可填写图片链接（多个链接用逗号分隔）">
+        </mat-form-field>
+      </div>
+
+      <!-- 提示信息 -->
+      <div class="alert alert-info" style="margin-bottom: 24px;">
+        <mat-icon style="vertical-align: middle; margin-right: 8px;">info</mat-icon>
+        提示：发布的信息需要管理员审核通过后才会对公众显示，请确保信息真实有效。
+      </div>
+
+      <!-- 提交按钮 -->
+      <div style="display: flex; gap: 16px; justify-content: flex-end;">
+        <button mat-button type="button" routerLink="/lost">
+          取消
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading || itemForm.invalid">
+          <mat-spinner *ngIf="loading" diameter="20" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></mat-spinner>
+          <span *ngIf="!loading">发布信息</span>
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

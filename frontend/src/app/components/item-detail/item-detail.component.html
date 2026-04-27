@@ -1,0 +1,149 @@
+<div *ngIf="loading" class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>
+
+<div *ngIf="!loading && error" class="alert alert-error">
+  {{ error }}
+</div>
+
+<div *ngIf="!loading && item">
+  <!-- 导航面包屑 -->
+  <div style="margin-bottom: 24px;">
+    <a routerLink="/lost" style="color: #1976d2; text-decoration: none;">
+      <mat-icon style="vertical-align: middle;">arrow_back</mat-icon>
+      返回列表
+    </a>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <mat-card class="card">
+        <mat-card-header>
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <span class="status-badge" [ngClass]="getStatusClass(item.status)" style="margin-bottom: 8px;">
+                {{ getStatusText(item.status) }}
+              </span>
+              <mat-card-title style="font-size: 1.5rem; margin-bottom: 8px;">
+                {{ item.title }}
+              </mat-card-title>
+              <mat-card-subtitle style="color: #757575;">
+                <span class="status-badge" [ngClass]="item.itemType === 'LOST' ? 'status-pending' : 'status-approved'" style="margin-right: 12px;">
+                  {{ getItemTypeText(item.itemType) }}
+                </span>
+                <mat-icon style="font-size: 16px; vertical-align: middle; margin-right: 4px;">visibility</mat-icon>
+                浏览 {{ item.viewCount }} 次
+              </mat-card-subtitle>
+            </div>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <!-- 基本信息 -->
+          <div style="margin-bottom: 24px;">
+            <h4 style="margin-bottom: 16px; color: #1976d2;">基本信息</h4>
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>物品类型：</strong>{{ item.itemTypeName || '-' }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>地铁线路：</strong>{{ item.subwayLineName || '-' }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>站点：</strong>{{ item.stationName || '-' }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>时间：</strong>{{ item.lostFoundTime | date: 'yyyy-MM-dd HH:mm' || '-' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 详细描述 -->
+          <div style="margin-bottom: 24px;">
+            <h4 style="margin-bottom: 16px; color: #1976d2;">详细描述</h4>
+            <p style="white-space: pre-wrap; line-height: 1.8;">{{ item.description }}</p>
+          </div>
+
+          <!-- 联系方式 -->
+          <div style="margin-bottom: 24px;">
+            <h4 style="margin-bottom: 16px; color: #1976d2;">联系方式</h4>
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>联系人：</strong>{{ item.contactName || item.publisherName || '-' }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>电话：</strong>{{ item.contactPhone || '-' }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>邮箱：</strong>{{ item.contactEmail || '-' }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>发布时间：</strong>{{ item.createdAt | date: 'yyyy-MM-dd HH:mm' }}</p>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-md-4">
+      <!-- 快捷操作 -->
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title class="card-header" style="border-bottom: none; margin-bottom: 0;">
+            <mat-icon style="vertical-align: middle; margin-right: 8px;">touch_app</mat-icon>
+            快捷操作
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="!authService.isLoggedIn" class="alert alert-info">
+            请先 <a routerLink="/login" style="color: #1976d2;">登录</a> 后进行认领操作
+          </div>
+
+          <div *ngIf="authService.isLoggedIn && !canClaim()" class="alert alert-warning">
+            <p *ngIf="item.publisherId === authService.userId">这是您发布的信息，无法认领</p>
+            <p *ngIf="item.status !== 'APPROVED'">该信息当前不可认领</p>
+          </div>
+
+          <div *ngIf="canClaim()">
+            <p style="margin-bottom: 16px; color: #757575;">
+              如果这是您的物品，请填写以下信息提交认领申请
+            </p>
+            
+            <div *ngIf="claimSuccess" class="alert alert-success">
+              {{ claimSuccess }}
+            </div>
+            
+            <div *ngIf="claimError" class="alert alert-error">
+              {{ claimError }}
+            </div>
+            
+            <form [formGroup]="claimForm" (ngSubmit)="submitClaim()">
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>认领理由 *</mat-label>
+                  <textarea matInput formControlName="claimReason" rows="4" placeholder="请详细描述物品特征，以便管理员审核"></textarea>
+                  <mat-error *ngIf="f['claimReason'].invalid && f['claimReason'].touched">
+                    <span *ngIf="f['claimReason'].errors?.['required']">请填写认领理由</span>
+                    <span *ngIf="f['claimReason'].errors?.['maxlength']">最多2000个字符</span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>证明图片URL（可选）</mat-label>
+                  <input matInput formControlName="proofImages" placeholder="如有证明图片，可填写图片链接">
+                </mat-form-field>
+              </div>
+              
+              <button mat-raised-button color="primary" type="submit" [disabled]="claimLoading || claimForm.invalid" style="width: 100%;">
+                <mat-spinner *ngIf="claimLoading" diameter="20" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></mat-spinner>
+                <span *ngIf="!claimLoading">提交认领申请</span>
+              </button>
+            </form>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

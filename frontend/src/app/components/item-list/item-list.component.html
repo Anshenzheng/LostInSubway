@@ -1,0 +1,126 @@
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title class="card-header">
+      <mat-icon style="vertical-align: middle; margin-right: 8px;">
+        {{ itemType === 'LOST' ? 'search' : 'volunteer_activism' }}
+      </mat-icon>
+      {{ getPageTitle() }}
+      <span style="font-size: 14px; font-weight: normal; color: #757575; margin-left: 16px;">
+        共 {{ totalElements }} 条记录
+      </span>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <!-- 筛选标签 -->
+    <div style="margin-bottom: 24px;">
+      <mat-chip-listbox>
+        <mat-chip-option [selected]="itemType === undefined" routerLink="/lost">全部</mat-chip-option>
+        <mat-chip-option [selected]="itemType === 'LOST'" routerLink="/lost">寻物启事</mat-chip-option>
+        <mat-chip-option [selected]="itemType === 'FOUND'" routerLink="/found">招领启事</mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    
+    <div *ngIf="!loading && items.length === 0" class="empty-state">
+      <mat-icon class="icon">inbox</mat-icon>
+      <h3>暂无信息</h3>
+      <p>还没有相关的失物招领信息</p>
+      <button mat-raised-button color="primary" routerLink="/publish" style="margin-top: 16px;">
+        <mat-icon>add</mat-icon>
+        发布第一条信息
+      </button>
+    </div>
+    
+    <div *ngIf="!loading && items.length > 0">
+      <div class="table-container">
+        <table mat-table [dataSource]="items" class="mat-elevation-z8" style="width: 100%;">
+          <!-- 类型列 -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>类型</th>
+            <td mat-cell *matCellDef="let item">
+              <span class="status-badge" [ngClass]="item.itemType === 'LOST' ? 'status-pending' : 'status-approved'">
+                {{ getItemTypeText(item.itemType) }}
+              </span>
+            </td>
+          </ng-container>
+          
+          <!-- 标题列 -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>标题</th>
+            <td mat-cell *matCellDef="let item">
+              <a [routerLink]="['/item', item.id]" style="color: #1976d2; text-decoration: none; font-weight: 500;">
+                {{ item.title }}
+              </a>
+            </td>
+          </ng-container>
+          
+          <!-- 线路/站点列 -->
+          <ng-container matColumnDef="location">
+            <th mat-header-cell *matHeaderCellDef>线路/站点</th>
+            <td mat-cell *matCellDef="let item">
+              {{ item.subwayLineName || '-' }} / {{ item.stationName || '-' }}
+            </td>
+          </ng-container>
+          
+          <!-- 发布者列 -->
+          <ng-container matColumnDef="publisher">
+            <th mat-header-cell *matHeaderCellDef>发布者</th>
+            <td mat-cell *matCellDef="let item">
+              {{ item.publisherName || '-' }}
+            </td>
+          </ng-container>
+          
+          <!-- 状态列 -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>状态</th>
+            <td mat-cell *matCellDef="let item">
+              <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                {{ getStatusText(item.status) }}
+              </span>
+            </td>
+          </ng-container>
+          
+          <!-- 浏览次数列 -->
+          <ng-container matColumnDef="views">
+            <th mat-header-cell *matHeaderCellDef>浏览</th>
+            <td mat-cell *matCellDef="let item">
+              <mat-icon style="font-size: 16px; vertical-align: middle; margin-right: 4px;">visibility</mat-icon>
+              {{ item.viewCount }}
+            </td>
+          </ng-container>
+          
+          <!-- 发布时间列 -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>发布时间</th>
+            <td mat-cell *matCellDef="let item">
+              {{ item.createdAt | date: 'yyyy-MM-dd HH:mm' }}
+            </td>
+          </ng-container>
+          
+          <tr mat-header-row *matHeaderRowDef="['type', 'title', 'location', 'publisher', 'status', 'views', 'createdAt']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['type', 'title', 'location', 'publisher', 'status', 'views', 'createdAt'];"></tr>
+        </table>
+      </div>
+      
+      <!-- 分页 -->
+      <div class="pagination" style="margin-top: 24px;">
+        <button mat-button (click)="goToPage(page - 1)" [disabled]="page === 0">
+          <mat-icon>chevron_left</mat-icon>
+          上一页
+        </button>
+        
+        <span style="padding: 8px 16px; font-weight: 500;">
+          第 {{ page + 1 }} 页 / 共 {{ totalPages }} 页
+        </span>
+        
+        <button mat-button (click)="goToPage(page + 1)" [disabled]="page >= totalPages - 1">
+          下一页
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
